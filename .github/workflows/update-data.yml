@@ -2,8 +2,8 @@ name: Update ValueFinder Data
 
 on:
   schedule:
-    # 매일 09:05 KST (00:05 UTC), 평일
-    - cron: "5 0 * * 1-5"
+    # 3시간마다 실행 (평일 07:00~22:00 KST = UTC 22:00~13:00)
+    - cron: "0 22,1,4,7,10,13 * * 1-5"
   workflow_dispatch: # 수동 실행 버튼
 
 jobs:
