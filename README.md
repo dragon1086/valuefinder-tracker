@@ -1,5 +1,9 @@
 <p align="center">
-  <img src="web/public/logo.png" alt="ValueFinder 수익률 트래커" width="600" />
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="web/public/logo-dark.png">
+    <source media="(prefers-color-scheme: light)" srcset="web/public/logo.png">
+    <img alt="ValueFinder 수익률 트래커" src="web/public/logo.png" width="600" />
+  </picture>
 </p>
 
 <p align="center">
