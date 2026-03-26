@@ -16,21 +16,11 @@
 
 ## 🏗 아키텍처
 
-```
-GitHub Actions (매일 09:05 KST)
-  → ScraperAPI로 valuefinder.co.kr 크롤링
-  → FinanceDataReader로 KRX 주가 조회
-  → data/reports.json 업데이트 + git push
+![architecture](web/public/architecture.png)
 
-GitHub Repository
-  → push 감지 → Vercel 자동 재배포
-
-Vercel (Next.js)
-  → reports.json 읽어 대시보드 렌더링
-```
-
-- **DB 없음** — `data/reports.json` 하나로 모든 상태 관리
-- **Mac 불필요** — GitHub 서버에서 완전 독립 실행
+- **DB 없음** — `data/reports.json` 하나로 모든 상태 관리 (Git as Database)
+- **Mac 불필요** — GitHub Actions 서버에서 완전 독립 실행
+- **ScraperAPI** — 한국 IP 우회 크롤링 (무료 1,000 크레딧/월, 하루 44 크레딧 사용)
 
 ## 🚀 배포 방법
 
