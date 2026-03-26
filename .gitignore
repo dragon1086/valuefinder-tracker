@@ -4,3 +4,8 @@ __pycache__/
 *.pyc
 .env
 .DS_Store
+
+# Next.js
+web/.next/
+web/node_modules/
+web/.env*.local

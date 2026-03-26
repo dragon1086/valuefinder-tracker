@@ -8,9 +8,11 @@ ValueFinder Tracker
 
 import os
 import re
+import json
 import sqlite3
 import logging
 import requests
+import subprocess
 from bs4 import BeautifulSoup
 from datetime import datetime, date, timedelta
 from pathlib import Path
@@ -337,6 +339,84 @@ def daily_performance_report(conn: sqlite3.Connection):
     send_telegram("\n".join(lines))
 
 
+# ── JSON Export ───────────────────────────────────────────────────
+def export_json(conn: sqlite3.Connection):
+    """DB에서 최신 price_snapshots 조인해서 data/reports.json 생성 후 git push"""
+    today_str = date.today().strftime("%Y-%m-%d")
+
+    rows = conn.execute("""
+        SELECT
+            r.wr_id,
+            r.company,
+            r.ticker,
+            r.title,
+            r.author,
+            r.report_date,
+            r.url,
+            r.price_on_date,
+            ps.price   AS latest_price,
+            ps.pct_change
+        FROM reports r
+        LEFT JOIN price_snapshots ps
+            ON ps.wr_id = r.wr_id
+            AND ps.snap_date = (
+                SELECT MAX(snap_date)
+                FROM price_snapshots
+                WHERE wr_id = r.wr_id
+            )
+        WHERE r.ticker IS NOT NULL AND r.price_on_date IS NOT NULL
+        ORDER BY r.report_date DESC
+    """).fetchall()
+
+    reports = []
+    for wr_id, company, ticker, title, author, report_date, url, price_on_date, latest_price, pct_change in rows:
+        if latest_price is None:
+            latest_price = price_on_date
+        if pct_change is None and price_on_date and latest_price:
+            pct_change = (latest_price - price_on_date) / price_on_date * 100
+        reports.append({
+            "wr_id":         wr_id,
+            "company":       company or "",
+            "ticker":        ticker or "",
+            "title":         title or "",
+            "author":        author or "",
+            "report_date":   report_date or "",
+            "url":           url or "",
+            "price_on_date": price_on_date,
+            "latest_price":  latest_price,
+            "pct_change":    round(pct_change, 2) if pct_change is not None else None,
+        })
+
+    data_dir = BASE_DIR / "data"
+    data_dir.mkdir(exist_ok=True)
+    out_path = data_dir / "reports.json"
+
+    payload = {
+        "updated_at": datetime.utcnow().isoformat() + "Z",
+        "reports":    reports,
+    }
+    out_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2))
+    log.info("JSON export 완료: %s (%d건)", out_path, len(reports))
+
+    # git push
+    try:
+        subprocess.run(
+            ["git", "add", "data/reports.json"],
+            cwd=BASE_DIR, check=True, capture_output=True,
+        )
+        subprocess.run(
+            ["git", "commit", "-m", "🤖 data: update reports"],
+            cwd=BASE_DIR, check=True, capture_output=True,
+        )
+        subprocess.run(
+            ["git", "push"],
+            cwd=BASE_DIR, check=True, capture_output=True,
+        )
+        log.info("git push 완료")
+    except subprocess.CalledProcessError as e:
+        log.warning("git push 실패 (변경 없음이거나 에러): %s", e.stderr.decode() if e.stderr else e)
+
+
 # ── 메인 ──────────────────────────────────────────────────────────
 def main(report_only: bool = False):
     log.info("=== ValueFinder Tracker 시작 ===")
@@ -361,6 +441,9 @@ def main(report_only: bool = False):
 
     # 3) 일일 수익률 리포트
     daily_performance_report(conn)
+
+    # 4) JSON export
+    export_json(conn)
 
     conn.close()
     log.info("=== 완료 ===")
