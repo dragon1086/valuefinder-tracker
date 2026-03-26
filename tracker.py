@@ -324,7 +324,7 @@ def main():
         cwd=cwd, capture_output=True, text=True
     )
     if "nothing to commit" not in result.stdout + result.stderr:
-        subprocess.run(["git", "push", "--force", "origin", "main"], cwd=cwd)
+        subprocess.run(["git", "push", "origin", "main"], cwd=cwd)
         log.info("git push 완료")
     else:
         log.info("변경사항 없음 — git push 스킵")
