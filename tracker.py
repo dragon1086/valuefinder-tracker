@@ -203,13 +203,17 @@ def calc_stats(df, base_price: float) -> dict:
     latest_price = float(df.iloc[-1]["Close"])
     pct_change   = round((latest_price - base_price) / base_price * 100, 2)
 
-    peak_idx   = df["High"].idxmax()
-    peak_price = float(df["High"].max())
+    # 0 제거 (FDR 데이터 오류 방어)
+    high_df = df[df["High"] > 0]
+    low_df  = df[df["Low"]  > 0]
+
+    peak_idx   = high_df["High"].idxmax()
+    peak_price = float(high_df["High"].max())
     peak_date  = str(peak_idx.date()) if hasattr(peak_idx, "date") else str(peak_idx)[:10]
     peak_pct   = round((peak_price - base_price) / base_price * 100, 2)
 
-    trough_idx   = df["Low"].idxmin()
-    trough_price = float(df["Low"].min())
+    trough_idx   = low_df["Low"].idxmin()
+    trough_price = float(low_df["Low"].min())
     trough_date  = str(trough_idx.date()) if hasattr(trough_idx, "date") else str(trough_idx)[:10]
     trough_pct   = round((trough_price - base_price) / base_price * 100, 2)
 
