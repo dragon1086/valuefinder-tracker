@@ -12,6 +12,9 @@ interface Report {
   price_on_date: number | null;
   latest_price: number | null;
   pct_change: number | null;
+  peak_price: number | null;
+  peak_date: string | null;
+  peak_pct: number | null;
 }
 
 interface ReportsData {
@@ -116,10 +119,13 @@ export default function Home() {
               <tr className="bg-gray-900 text-gray-400 text-xs uppercase tracking-wider">
                 <th className="px-4 py-3 text-left">종목명</th>
                 <th className="px-4 py-3 text-left">티커</th>
-                <th className="px-4 py-3 text-left">리포트 작성일</th>
-                <th className="px-4 py-3 text-right">작성일 가격</th>
+                <th className="px-4 py-3 text-left">작성일</th>
+                <th className="px-4 py-3 text-right">작성일가</th>
                 <th className="px-4 py-3 text-right">현재가</th>
                 <th className="px-4 py-3 text-right">수익률</th>
+                <th className="px-4 py-3 text-right">최고가</th>
+                <th className="px-4 py-3 text-right">최고가일</th>
+                <th className="px-4 py-3 text-right">최대수익</th>
                 <th className="px-4 py-3 text-center">리포트</th>
               </tr>
             </thead>
@@ -155,6 +161,17 @@ export default function Home() {
                         }`}
                       >
                         {r.pct_change != null ? formatPct(r.pct_change) : '-'}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-right text-gray-300 font-mono">
+                      {formatPrice(r.peak_price)}
+                    </td>
+                    <td className="px-4 py-3 text-right text-gray-400 text-xs">
+                      {r.peak_date ? r.peak_date.slice(2) : '-'}
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      <span className="font-bold font-mono text-yellow-400">
+                        {r.peak_pct != null ? formatPct(r.peak_pct) : '-'}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-center">
