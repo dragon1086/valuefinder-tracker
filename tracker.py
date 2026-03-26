@@ -278,15 +278,20 @@ def main():
                     "trough_price","trough_date","trough_pct"):
             entry.setdefault(key, None)
 
+        # ticker 없어도 wr_id 기록 → 다음 실행에서 신규로 재인식 방지
         reports_map[item["wr_id"]] = entry
         existing_ids.add(item["wr_id"])
         new_count += 1
 
-        ticker_str = f"<b>{ticker}</b>" if ticker else "❓ 티커 미발견"
-        price_str  = f"{base:,.0f}원" if base else "-"
+        # ticker 없는 종목(미국주식, 산업분석 등)은 텔레그램 알림 스킵
+        if not ticker:
+            log.info("티커 없음 → 텔레그램 스킵 (%s)", item["company"])
+            continue
+
+        price_str = f"{base:,.0f}원" if base else "-"
         send_telegram(
             f"📋 <b>밸류파인더 신규 리포트</b>\n\n"
-            f"종목: <b>{item['company']}</b> ({ticker_str})\n"
+            f"종목: <b>{item['company']}</b> (<b>{ticker}</b>)\n"
             f"제목: {item['title'][:60]}\n"
             f"작성일: {item['report_date']} | 작성자: {item['author']}\n"
             f"작성일 가격: {price_str}\n"
