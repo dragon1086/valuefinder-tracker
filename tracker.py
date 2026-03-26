@@ -15,29 +15,22 @@ from pathlib import Path
 SCRAPER_API_KEY = os.environ.get("SCRAPER_API_KEY", "")
 
 def _fetch_with_fallback(url: str, timeout: int = 30) -> requests.Response:
-    """직접 연결 실패 시 ScraperAPI fallback (한국 IP)"""
-    # 1) 직접 연결
-    try:
-        r = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=10)
+    """ScraperAPI 우선 (한국 IP). 키 없으면 직접 연결 시도."""
+    if SCRAPER_API_KEY:
+        scraper_url = (
+            f"https://api.scraperapi.com/"
+            f"?api_key={SCRAPER_API_KEY}"
+            f"&url={requests.utils.quote(url, safe='')}"
+            f"&country_code=kr"
+        )
+        r = requests.get(scraper_url, timeout=timeout)
         r.raise_for_status()
         return r
-    except Exception as e:
-        log.warning("직접 연결 실패: %s", e)
 
-    # 2) ScraperAPI fallback
-    if not SCRAPER_API_KEY:
-        raise ConnectionError("SCRAPER_API_KEY 없음 — 크롤링 불가")
-
-    scraper_url = (
-        f"https://api.scraperapi.com/"
-        f"?api_key={SCRAPER_API_KEY}"
-        f"&url={requests.utils.quote(url, safe='')}"
-        f"&country_code=kr"
-    )
-    log.info("ScraperAPI 시도 (kr)...")
-    r = requests.get(scraper_url, timeout=timeout)
+    # ScraperAPI 키 없을 때만 직접 연결 (로컬 실행용)
+    log.info("ScraperAPI 키 없음 — 직접 연결 시도")
+    r = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=10)
     r.raise_for_status()
-    log.info("ScraperAPI 성공")
     return r
 
 # ── 환경변수 로드 ─────────────────────────────────────────────────
