@@ -7,10 +7,52 @@ ValueFinder Tracker (JSON-only, DB-free)
 - 매일 전체 업데이트: latest_price, pct_change, peak, trough
 """
 
-import os, re, json, logging, requests, subprocess
+import os, re, json, logging, requests, subprocess, random
 from bs4 import BeautifulSoup
 from datetime import datetime, date, timedelta
 from pathlib import Path
+
+# 무료 한국 접근 가능 프록시 목록 (직접 연결 실패 시 순서대로 시도)
+FREE_PROXIES = [
+    "http://103.152.112.162:80",
+    "http://47.74.152.29:8888",
+    "http://103.105.49.59:80",
+    "http://20.206.106.192:80",
+    "http://103.149.162.195:80",
+]
+
+def _get_session(proxy: str | None = None) -> requests.Session:
+    s = requests.Session()
+    s.headers.update({"User-Agent": "Mozilla/5.0"})
+    if proxy:
+        s.proxies = {"http": proxy, "https": proxy}
+    return s
+
+def _fetch_with_fallback(url: str, timeout: int = 10) -> requests.Response:
+    """직접 연결 → 프록시 순서대로 fallback"""
+    # 1) 직접 연결
+    try:
+        r = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=timeout)
+        r.raise_for_status()
+        return r
+    except Exception as e:
+        log.warning("직접 연결 실패: %s", e)
+
+    # 2) 프록시 순서대로 시도
+    proxies = FREE_PROXIES[:]
+    random.shuffle(proxies)
+    for proxy in proxies:
+        try:
+            log.info("프록시 시도: %s", proxy)
+            r = requests.get(url, headers={"User-Agent": "Mozilla/5.0"},
+                             proxies={"http": proxy, "https": proxy}, timeout=15)
+            r.raise_for_status()
+            log.info("프록시 성공: %s", proxy)
+            return r
+        except Exception as e:
+            log.warning("프록시 실패 (%s): %s", proxy, e)
+
+    raise ConnectionError(f"모든 연결 실패: {url}")
 
 # ── 환경변수 로드 ─────────────────────────────────────────────────
 def _load_env():
@@ -81,16 +123,14 @@ def save_data(data: dict):
 # ── 크롤링 ───────────────────────────────────────────────────────
 def fetch_board(pages: int = 2) -> list[dict]:
     items = []
-    headers = {"User-Agent": "Mozilla/5.0"}
     wr_id_re = re.compile(r"wr_id=(\d+)")
 
     for page in range(1, pages + 1):
         url = BOARD_URL if page == 1 else f"{BOARD_URL}&page={page}"
         try:
-            r = requests.get(url, headers=headers, timeout=10)
-            r.raise_for_status()
+            r = _fetch_with_fallback(url)
         except Exception as e:
-            log.warning("fetch 실패 (page %d): %s", page, e)
+            log.warning("fetch 실패 (page %d): %s — 크롤링 중단", page, e)
             break
 
         soup = BeautifulSoup(r.text, "html.parser")
