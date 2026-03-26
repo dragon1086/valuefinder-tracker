@@ -56,7 +56,7 @@ function formatUpdatedAt(iso: string): string {
 
 export default function Home() {
   const data = loadReports();
-  const reports = [...data.reports].sort((a, b) => (b.pct_change ?? -Infinity) - (a.pct_change ?? -Infinity));
+  const reports = [...data.reports].sort((a, b) => b.report_date.localeCompare(a.report_date));
 
   const totalCount = reports.length;
   const profitCount = reports.filter(r => (r.pct_change ?? 0) > 0).length;
