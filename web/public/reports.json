@@ -1,6 +1,24 @@
 {
-  "updated_at": "2026-09-07T15:27:34Z",
+  "updated_at": "2026-09-07T23:55:22Z",
   "reports": [
+    {
+      "wr_id": 378,
+      "company": "한독크린텍",
+      "title": "N새글본업 카본블록 필터는 캐시카우, 반도체 CMP 공정용 필터 개발 신사업은 신성장동력",
+      "author": "지후",
+      "report_date": "2026.09.08",
+      "url": "https://valuefinder.co.kr/bbs/board.php?bo_table=report&wr_id=378",
+      "ticker": "256150",
+      "price_on_date": null,
+      "latest_price": null,
+      "pct_change": null,
+      "peak_price": null,
+      "peak_date": null,
+      "peak_pct": null,
+      "trough_price": null,
+      "trough_date": null,
+      "trough_pct": null
+    },
     {
       "wr_id": 377,
       "company": "인스피언",

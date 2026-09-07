@@ -1,6 +1,25 @@
 {
-  "updated_at": "2026-09-07T15:29:13Z",
+  "updated_at": "2026-09-07T23:56:36Z",
   "reports": [
+    {
+      "index_no": 916,
+      "company": "서흥",
+      "ticker": "008490",
+      "title": "승계 위한 주가 누르기와 일감 몰아주기? 젤텍, 이제 시장의 평가 받아야할 때",
+      "report_date": "2026-09-08",
+      "outlook": "positive",
+      "target_price": 32000,
+      "url": "https://www.researcharum.com/report/small-cap-research-view.php?index_no=916",
+      "price_on_date": null,
+      "latest_price": null,
+      "pct_change": null,
+      "peak_price": null,
+      "peak_date": null,
+      "peak_pct": null,
+      "trough_price": null,
+      "trough_date": null,
+      "trough_pct": null
+    },
     {
       "index_no": 915,
       "company": "HL D&I",
@@ -1150,14 +1169,14 @@
       "target_price": 2850,
       "url": "https://www.researcharum.com/report/small-cap-research-view.php?index_no=841",
       "price_on_date": 1898.0,
-      "latest_price": 916.0,
-      "pct_change": -51.74,
-      "peak_price": 2885.0,
+      "latest_price": 4580.0,
+      "pct_change": 141.31,
+      "peak_price": 14425.0,
       "peak_date": "2025-01-20",
-      "peak_pct": 52.0,
-      "trough_price": 610.0,
+      "peak_pct": 660.01,
+      "trough_price": 3050.0,
       "trough_date": "2026-06-29",
-      "trough_pct": -67.86,
+      "trough_pct": 60.7,
       "last_updated": "2026-09-07"
     },
     {
